@@ -732,6 +732,7 @@ def update_status():
             print(busyfree)
     except Exception as e:
         messagebox.showerror("Error", f"Σφάλμα κατά την εισαγωγή δεδομένων: {e}")
+        connection.rollback()
     finally:
         cursor1.close()
         cursor2.close()
