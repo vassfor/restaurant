@@ -1,3 +1,4 @@
+#No button
 import tkinter as tk
 from tkinter import messagebox,ttk
 import mysql.connector
@@ -27,10 +28,6 @@ def main_app():
     json_read.close()
     global items
     items ={}
-    global busyfree
-    busyfree = {}
-    for tb in the_tables:
-        busyfree[tb[0]] = 0
 
     brand = tk.Label(main,text=the_name+"   Reservations", font=("Arial", 25,"bold"),bg="#17202A",fg="#EAECEE")
     brand.pack(pady=(20,10))
@@ -329,16 +326,6 @@ def del_res(date,info,window):
                     break
             new_txt = tb+"\n "+str(capp)
             change_tb_text(tb,new_txt)
-            free_btns[tb].destroy()
-            x = btn_items[tb]["x"]
-            y = btn_items[tb]["y"]
-            r1 = btn_items[tb]["r1"]
-            if btn_items[tb]["shape"]<=4:
-                btn_items[tb]["button"].place(x=x+r1*0.35,y=y+r1*0.75,width=40)
-            else:
-                btn_items[tb]["button"].place(x=x+r1*0.55,y=y+r1*0.75,width=40)
-            busyfree[tb]=0
-            print(busyfree)
             messagebox.showinfo("Επιτυχία", "Η κράτηση ακυρώθηκε επιτυχώς.")
         except Exception as e:
             messagebox.showerror("Error", f"Σφάλμα κατά την εισαγωγή δεδομένων: {e}")
@@ -647,7 +634,7 @@ def new_table():
     add_button.bind("<Enter>", on_enter)
     add_button.bind("<Leave>", on_leave)
 
-free_btns={}
+
 def update_status():
     current_date = date.today()
     current_time = datetime.now().time()
@@ -678,15 +665,6 @@ def update_status():
             change_tb_color(t,color="blue")
             new_txt = t+"\n "+str(c)
             change_tb_text(t,new_txt)
-            free_btns[t].destroy()
-            x = btn_items[t]["x"]
-            y = btn_items[t]["y"]
-            r1 = btn_items[t]["r1"]
-            if btn_items[t]["shape"]<=4:
-                btn_items[t]["button"].place(x=x+r1*0.35,y=y+r1*0.75,width=40)
-            else:
-                btn_items[t]["button"].place(x=x+r1*0.55,y=y+r1*0.75,width=40)
-            busyfree[t]=0 
         cursor2.execute(
             """DELETE FROM reservations 
                 WHERE date<%s OR(date=%s AND time <= %s);""",
@@ -718,18 +696,6 @@ def update_status():
                 n=full_n[0]
             new_t = "   "+t+"\n"+n+"\n"+tm+"\n "+str(p)+" άτομα"
             change_tb_text(t,new_t)
-            btn_items[t]["button"].place_forget()
-            free = tk.Button(canvas,text="Free",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50", command=lambda id=id,t=t:free_res(free,t,id))
-            free_btns[t]=free
-            x=btn_items[t]["x"]
-            y=btn_items[t]["y"]
-            r1=btn_items[t]["r1"]
-            if btn_items[t]["shape"]<=4:
-                free.place(x=x+r1*0.35,y=y+r1*0.75,width=40)
-            else:
-                free.place(x=x+r1*0.55,y=y+r1*0.75,width=40)
-            busyfree[t]=1
-            print(busyfree)
     except Exception as e:
         messagebox.showerror("Error", f"Σφάλμα κατά την εισαγωγή δεδομένων: {e}")
         connection.rollback()
@@ -757,17 +723,7 @@ def free_res(btn1,t,id):
         connection.commit()
         change_tb_color(t,color="blue")
         new_txt = t+"\n "+str(btn_items[t]["shape"])
-        change_tb_text(t,new_txt)
-        busyfree[t] = 0
-        print(busyfree)
-        btn1.destroy()
-        x = btn_items[t]["x"]
-        y = btn_items[t]["y"]
-        r1 = btn_items[t]["r1"]
-        if btn_items[t]["shape"]<=4:
-            btn_items[t]["button"].place(x=x+r1*0.35,y=y+r1*0.75,width=40)
-        else:
-            btn_items[t]["button"].place(x=x+r1*0.55,y=y+r1*0.75,width=40)            
+        change_tb_text(t,new_txt)           
     except Exception as e:
         messagebox.showerror("Error", f"Σφάλμα κατά την εισαγωγή δεδομένων: {e}")
         connection.rollback()
@@ -796,13 +752,8 @@ def change_tb_text(tb_name, new_text):
     else:
         print("ERROR")
 
-btn_items = {}
 def draw_tables():
     canvas.delete("all")
-    for key in list(btn_items.keys()):
-        btn_items[key]["button"].destroy()
-    for key in list(free_btns.keys()):
-        free_btns[key].destroy()
     global x,y,i
     x,y=20,20
     i=0
@@ -821,23 +772,14 @@ def draw_tables():
         if the_tables[i][1]<4:
             table_id = canvas.create_oval(x, y, x+r1, y+r1, fill="#2C3E50", outline="white", width=1)
             text_id = canvas.create_text(x + r1/2, y + r1/2, text=the_tables[i][0]+"\n "+str(the_tables[i][1]), font=("Arial", 10), fill="white")
-            btn = tk.Button(canvas,text="Busy",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50",command=lambda i=i:busytb(the_tables[i][0]))
-            btn.place(x=x+r1*0.35,y=y+r1*0.75)
-            btn_items[the_tables[i][0]]={"button":btn,"shape":the_tables[i][1],"x":x,"y":y,"r1":r1}
             x+=r3
         elif the_tables[i][1]==4:
             table_id = canvas.create_rectangle(x, y, x+r1, y+r1, fill="#2C3E50", outline="white", width=1)
             text_id = canvas.create_text(x + r1/2, y + r1/2, text=the_tables[i][0]+"\n "+str(the_tables[i][1]), font=("Arial", 10), fill="white")
-            btn = tk.Button(canvas,text="Busy",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50",command=lambda i=i:busytb(the_tables[i][0]))
-            btn.place(x=x+r1*0.35,y=y+r1*0.75)
-            btn_items[the_tables[i][0]]={"button":btn,"shape":the_tables[i][1],"x":x,"y":y,"r1":r1}
             x+=r3
         else:
             table_id = canvas.create_rectangle(x, y, x+r2, y+r1, fill="#2C3E50", outline="white", width=1)
             text_id = canvas.create_text(x + r2/2, y + r1/2, text=the_tables[i][0]+"\n "+str(the_tables[i][1]), font=("Arial", 10), fill="white")
-            btn = tk.Button(canvas,text="Busy",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50",command=lambda i=i:busytb(the_tables[i][0]))
-            btn.place(x=x+r1*0.55,y=y+r1*0.75)
-            btn_items[the_tables[i][0]]={"button":btn,"shape":the_tables[i][1],"x":x,"y":y,"r1":r1}
             x+=r4           
         items[the_tables[i][0]] = {"shape":table_id,"text":text_id}
         if x+r3+10>=canvas.winfo_width():
@@ -856,29 +798,6 @@ def draw_tables():
         main.after(100,draw_next_tb)
 
     draw_next_tb()
-
-def freetb(btn,n):
-    change_tb_color(n,"blue")
-    btn.destroy()
-    busyfree[n] = 0
-    print(busyfree)
-
-def busytb(n):
-    shape = btn_items[n]["shape"]
-    x = btn_items[n]["x"]
-    y = btn_items[n]["y"]
-    r1 = btn_items[n]["r1"]
-    change_tb_color(n)
-    if shape<=4:
-        freebtn = tk.Button(canvas,text="Free",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50", command=lambda n=n:freetb(freebtn,n))
-        freebtn.place(x=x+r1*0.35,y=y+r1*0.75,width=40)
-        busyfree[n] = 1
-        print(busyfree)
-    else:
-        freebtn = tk.Button(canvas,text="Free",font=("Arial", 9),  bg="#EAECEE",fg ="#2C3E50", command=lambda n=n:freetb(freebtn,n))
-        freebtn.place(x=x+r1*0.55,y=y+r1*0.75,width=40)
-        busyfree[n] = 1
-        print(busyfree)
 
 def update_time():
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
